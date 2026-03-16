@@ -1,0 +1,120 @@
+<div class="row">
+  <div class="col-md-8">
+    <h1>Feed</h1>
+    
+    <!-- New Post Form -->
+    <div class="card mb-4">
+      <div class="card-body">
+        <%= form_with(model: @post, local: true) do |form| %>
+          <% if @post.errors.any? %>
+            <div id="error_explanation">
+              <h2><%= pluralize(@post.errors.count, "error") %> prohibited this post from being saved:</h2>
+              <ul>
+                <% @post.errors.full_messages.each do |message| %>
+                  <li><%= message %></li>
+                <% end %>
+              </ul>
+            </div>
+          <% end %>
+
+          <div class="form-group">
+            <%= form.text_area :content, class: "form-control", rows: 3, placeholder: "What's on your mind?" %>
+          </div>
+          
+          <div class="actions">
+            <%= form.submit "Post", class: "btn btn-primary" %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Posts Feed -->
+    <% @posts.each do |post| %>
+      <div class="card mb-3">
+        <div class="card-header">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <strong><%= link_to post.user.username, post.user %></strong>
+              <small class="text-muted">- <%= time_ago_in_words(post.created_at) %> ago</small>
+            </div>
+            <% if post.user == current_user %>
+              <%= link_to "Delete", post, data: { turbo_method: :delete, turbo_confirm: "Are you sure?" }, class: "btn btn-sm btn-outline-danger" %>
+            <% end %>
+          </div>
+        </div>
+        <div class="card-body">
+          <p class="card-text"><%= post.content %></p>
+          
+          <!-- Likes -->
+          <div class="mb-2">
+            <% if post.liked_by?(current_user) %>
+              <% like = post.likes.find_by(user: current_user) %>
+              <%= link_to "Unlike (#{post.likes_count})", post_like_path(post, like), data: { turbo_method: :delete }, class: "btn btn-sm btn-outline-secondary" %>
+            <% else %>
+              <%= link_to "Like (#{post.likes_count})", post_likes_path(post), data: { turbo_method: :post }, class: "btn btn-sm btn-outline-primary" %>
+            <% end %>
+          </div>
+          
+          <!-- Comments -->
+          <div class="comments-section">
+            <h6>Comments (<%= post.comments_count %>)</h6>
+            
+            <!-- New Comment Form -->
+            <div class="comment-form mb-3">
+              <%= form_with(model: [post, post.comments.build], local: true) do |form| %>
+                <div class="input-group">
+                  <%= form.text_field :content, class: "form-control", placeholder: "Add a comment..." %>
+                  <%= form.submit "Comment", class: "btn btn-outline-primary" %>
+                </div>
+              <% end %>
+            </div>
+            
+            <!-- Comments List -->
+            <% post.comments.includes(:user).each do |comment| %>
+              <div class="comment mb-2">
+                <div class="d-flex justify-content-between">
+                  <strong><%= comment.user.username %></strong>
+                  <small><%= time_ago_in_words(comment.created_at) %> ago</small>
+                </div>
+                <p class="mb-1"><%= comment.content %></p>
+                <% if comment.user == current_user %>
+                  <%= link_to "Delete", post_comment_path(post, comment), data: { turbo_method: :delete, turbo_confirm: "Are you sure?" }, class: "btn btn-sm btn-link text-danger" %>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+  
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-header">
+        <h5>Profile</h5>
+      </div>
+      <div class="card-body">
+        <div class="text-center">
+          <% if current_user.profile_picture.present? %>
+            <%= image_tag current_user.profile_picture, class: "rounded-circle mb-3", style: "width: 100px; height: 100px; object-fit: cover;" %>
+          <% else %>
+            <div class="rounded-circle bg-secondary d-inline-block mb-3" style="width: 100px; height: 100px;"></div>
+          <% end %>
+          <h5><%= current_user.name %></h5>
+          <p class="text-muted">@<%= current_user.username %></p>
+          <p><%= current_user.bio %></p>
+          <div class="d-flex justify-content-around">
+            <div class="text-center">
+              <strong><%= current_user.following_count %></strong>
+              <div>Following</div>
+            </div>
+            <div class="text-center">
+              <strong><%= current_user.followers_count %></strong>
+              <div>Followers</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
