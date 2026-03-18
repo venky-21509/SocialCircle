@@ -2,7 +2,9 @@
   <div class="col-md-4">
     <div class="card">
       <div class="card-body text-center">
-        <% if @user.profile_picture.present? %>
+        <% if @user.avatar.present? %>
+          <%= image_tag @user.avatar, class: "rounded-circle mb-3", style: "width: 150px; height: 150px; object-fit: cover;" %>
+        <% elsif @user.profile_picture.present? %>
           <%= image_tag @user.profile_picture, class: "rounded-circle mb-3", style: "width: 150px; height: 150px; object-fit: cover;" %>
         <% else %>
           <div class="rounded-circle bg-secondary d-inline-block mb-3" style="width: 150px; height: 150px;"></div>

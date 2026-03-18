@@ -6,7 +6,9 @@
       <div class="card">
         <div class="card-body">
           <div class="d-flex align-items-center mb-3">
-            <% if user.profile_picture.present? %>
+            <% if user.avatar.present? %>
+              <%= image_tag user.avatar, class: "rounded-circle me-3", style: "width: 50px; height: 50px; object-fit: cover;" %>
+            <% elsif user.profile_picture.present? %>
               <%= image_tag user.profile_picture, class: "rounded-circle me-3", style: "width: 50px; height: 50px; object-fit: cover;" %>
             <% else %>
               <div class="rounded-circle bg-secondary me-3 d-inline-block" style="width: 50px; height: 50px;"></div>

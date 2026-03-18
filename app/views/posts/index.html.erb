@@ -1,4 +1,36 @@
 <div class="row">
+  <div class="col-md-4">
+    <div class="card mb-4">
+      <div class="card-header">
+        <h5>Profile</h5>
+      </div>
+      <div class="card-body">
+        <div class="text-center">
+          <% if current_user.avatar.present? %>
+            <%= image_tag current_user.avatar, class: "rounded-circle mb-3", style: "width: 100px; height: 100px; object-fit: cover;" %>
+          <% elsif current_user.profile_picture.present? %>
+            <%= image_tag current_user.profile_picture, class: "rounded-circle mb-3", style: "width: 100px; height: 100px; object-fit: cover;" %>
+          <% else %>
+            <div class="rounded-circle bg-secondary d-inline-block mb-3" style="width: 100px; height: 100px;"></div>
+          <% end %>
+          <h5><%= current_user.name %></h5>
+          <p class="text-muted">@<%= current_user.username %></p>
+          <p><%= current_user.bio %></p>
+          <div class="d-flex justify-content-around">
+            <div class="text-center">
+              <strong><%= current_user.following_count %></strong>
+              <div>Following</div>
+            </div>
+            <div class="text-center">
+              <strong><%= current_user.followers_count %></strong>
+              <div>Followers</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
   <div class="col-md-8">
     <h1>Feed</h1>
     
@@ -86,35 +118,5 @@
         </div>
       </div>
     <% end %>
-  </div>
-  
-  <div class="col-md-4">
-    <div class="card">
-      <div class="card-header">
-        <h5>Profile</h5>
-      </div>
-      <div class="card-body">
-        <div class="text-center">
-          <% if current_user.profile_picture.present? %>
-            <%= image_tag current_user.profile_picture, class: "rounded-circle mb-3", style: "width: 100px; height: 100px; object-fit: cover;" %>
-          <% else %>
-            <div class="rounded-circle bg-secondary d-inline-block mb-3" style="width: 100px; height: 100px;"></div>
-          <% end %>
-          <h5><%= current_user.name %></h5>
-          <p class="text-muted">@<%= current_user.username %></p>
-          <p><%= current_user.bio %></p>
-          <div class="d-flex justify-content-around">
-            <div class="text-center">
-              <strong><%= current_user.following_count %></strong>
-              <div>Following</div>
-            </div>
-            <div class="text-center">
-              <strong><%= current_user.followers_count %></strong>
-              <div>Followers</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
 </div>
