@@ -8,6 +8,74 @@ export default class extends Controller {
 
   connect() {
     this.inputTarget.addEventListener("change", this.handleFileSelect.bind(this));
+    
+    // Check for pending avatar file from modal
+    this.loadPendingFile();
+  }
+
+  loadPendingFile() {
+    const pendingFile = sessionStorage.getItem("pendingAvatarFile");
+    const pendingFileName = sessionStorage.getItem("pendingAvatarFileName");
+    
+    if (pendingFile) {
+      // Create a blob from the data URL
+      const blob = this.dataURLtoBlob(pendingFile);
+      
+      // Create a File object
+      const file = new File([blob], pendingFileName || "avatar.jpg", { type: blob.type });
+      
+      // Create a DataTransfer to set the file input
+      const dataTransfer = new DataTransfer();
+      dataTransfer.items.add(file);
+      this.inputTarget.files = dataTransfer.files;
+      
+      // Simulate file selection
+      this.loadCropperWithDataURL(pendingFile);
+      
+      // Clear session storage
+      sessionStorage.removeItem("pendingAvatarFile");
+      sessionStorage.removeItem("pendingAvatarFileName");
+    }
+  }
+
+  dataURLtoBlob(dataURL) {
+    const arr = dataURL.split(",");
+    const mime = arr[0].match(/:(.*?);/)[1];
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new Blob([u8arr], { type: mime });
+  }
+
+  loadCropperWithDataURL(dataURL) {
+    this.imageTarget.src = dataURL;
+    this.containerTarget.style.display = "block";
+    
+    // Destroy existing cropper if any
+    if (this.cropper) {
+      this.cropper.destroy();
+    }
+    
+    // Initialize cropper
+    this.cropper = new Cropper(this.imageTarget, {
+      aspectRatio: 1 / 1,
+      viewMode: 0,
+      autoCropArea: 0.6,
+      responsive: true,
+      guides: true,
+      center: true,
+      highlight: true,
+      cropBoxMovable: true,
+      cropBoxResizable: true,
+      toggleDragModeOnDblclick: true,
+      modal: true,
+      background: true,
+      zoomOnWheel: true,
+      wheelZoomRatio: 0.1
+    });
   }
 
   handleFileSelect(event) {
