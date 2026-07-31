@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
+</head>
+<body>
+  <h1>Welcome to <%= @app_name %>!</h1>
+  
+  <p>Hi <%= @user.name %>,</p>
+  
+  <p>Thank you for signing up for <%= @app_name %>! We're excited to have you join our social network.</p>
+  
+  <p>Here's what you can do with your new account:</p>
+  <ul>
+    <li>Create and share posts with your followers</li>
+    <li>Follow other users and see their posts in your feed</li>
+    <li>Like and comment on posts</li>
+    <li>Customize your profile with a bio and profile picture</li>
+  </ul>
+  
+  <p>Get started by <a href="<%= root_url %>">signing in</a> and exploring the community!</p>
+  
+  <p>If you have any questions, feel free to reach out to our support team.</p>
+  
+  <p>Best regards,<br>
+  The <%= @app_name %> Team</p>
+  
+  <hr>
+  <p><small>This email was sent to <%= @user.email %>. You received this email because you signed up for an account on <%= @app_name %>.</small></p>
+</body>
+</html>
