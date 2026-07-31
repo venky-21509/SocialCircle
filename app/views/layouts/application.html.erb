@@ -1,14 +1,12 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title><%= content_for(:title) || "Odin Book" %></title>
+    <title><%= content_for(:title) || "SocialCircle" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
-
-    <%= yield :head %>
 
     <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
     <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
@@ -23,6 +21,33 @@
   </head>
 
   <body>
-    <%= yield %>
+    <header class="navbar">
+      <div class="container">
+        <%= link_to "SocialCircle", root_path, class: "navbar-brand" %>
+        
+        <nav class="navbar-nav">
+          <% if user_signed_in? %>
+            <%= link_to "Home", root_path, class: "nav-link" %>
+            <%= link_to "Users", users_path, class: "nav-link" %>
+            <%= link_to "Profile", current_user, class: "nav-link" %>
+            <%= link_to "Sign Out", destroy_user_session_path, data: { turbo_method: :delete }, class: "nav-link" %>
+          <% else %>
+            <%= link_to "Sign In", new_user_session_path, class: "nav-link" %>
+            <%= link_to "Sign Up", new_user_registration_path, class: "nav-link" %>
+          <% end %>
+        </nav>
+      </div>
+    </header>
+
+    <main class="container">
+      <% if notice %>
+        <p class="alert alert-success"><%= notice %></p>
+      <% end %>
+      <% if alert %>
+        <p class="alert alert-danger"><%= alert %></p>
+      <% end %>
+
+      <%= yield %>
+    </main>
   </body>
 </html>

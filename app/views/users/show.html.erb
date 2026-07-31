@@ -1,0 +1,143 @@
+<div class="row">
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-body text-center">
+        <% if @user.profile_picture.present? %>
+          <%= image_tag @user.profile_picture, class: "rounded-circle mb-3", style: "width: 150px; height: 150px; object-fit: cover;" %>
+        <% else %>
+          <div class="rounded-circle bg-secondary d-inline-block mb-3" style="width: 150px; height: 150px;"></div>
+        <% end %>
+        
+        <h3><%= @user.name %></h3>
+        <p class="text-muted">@<%= @user.username %></p>
+        <p><%= @user.bio.present? ? @user.bio : "No bio available" %></p>
+        
+        <div class="d-flex justify-content-around mb-3">
+          <div class="text-center">
+            <strong><%= @user.following_count %></strong>
+            <div>Following</div>
+          </div>
+          <div class="text-center">
+            <strong><%= @user.followers_count %></strong>
+            <div>Followers</div>
+          </div>
+        </div>
+        
+        <% if @user != current_user %>
+          <% if current_user.following?(@user) %>
+            <%= link_to "Following", unfollow_user_path(@user), data: { turbo_method: :delete }, class: "btn btn-secondary btn-block" %>
+          <% else %>
+            <% existing_follow = current_user.followed_relationships.find_by(followed: @user) %>
+            <% if existing_follow&.pending? %>
+              <span class="btn btn-warning btn-block">Request Sent</span>
+            <% else %>
+              <%= link_to "Follow", follow_user_path(@user), data: { turbo_method: :post }, class: "btn btn-primary btn-block" %>
+            <% end %>
+          <% end %>
+        <% else %>
+          <%= link_to "Edit Profile", edit_user_registration_path, class: "btn btn-outline-primary btn-block" %>
+        <% end %>
+      </div>
+    </div>
+    
+    <% if @user == current_user %>
+      <div class="card mt-3">
+        <div class="card-header">
+          <h5>Follow Requests</h5>
+        </div>
+        <div class="card-body">
+          <% pending_requests = @user.follower_relationships.where(status: 'pending').includes(:follower) %>
+          <% if pending_requests.any? %>
+            <% pending_requests.each do |follow_request| %>
+              <% follower = follow_request.follower %>
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <div>
+                  <strong><%= link_to follower.name, follower %></strong>
+                  <small class="text-muted">@<%= follower.username %></small>
+                </div>
+                <div>
+                  <%= form_with(model: follow_request, url: follow_path(follow_request), method: :patch) do |f| %>
+                    <%= f.submit "Accept", name: :commit, value: "Accept", class: "btn btn-sm btn-success me-1" %>
+                    <%= f.submit "Reject", name: :commit, value: "Reject", class: "btn btn-sm btn-danger" %>
+                  <% end %>
+                </div>
+              </div>
+            <% end %>
+          <% else %>
+            <p class="text-muted">No pending follow requests</p>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+  
+  <div class="col-md-8">
+    <h3>Posts</h3>
+    
+    <% if @posts.any? %>
+      <% @posts.each do |post| %>
+        <div class="card mb-3">
+          <div class="card-header">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <strong><%= link_to post.user.username, post.user %></strong>
+                <small class="text-muted">- <%= time_ago_in_words(post.created_at) %> ago</small>
+              </div>
+              <% if post.user == current_user %>
+                <%= link_to "Delete", post, data: { turbo_method: :delete, turbo_confirm: "Are you sure?" }, class: "btn btn-sm btn-outline-danger" %>
+              <% end %>
+            </div>
+          </div>
+          <div class="card-body">
+            <p class="card-text"><%= post.content %></p>
+            
+            <!-- Likes -->
+            <div class="mb-2">
+              <% if post.liked_by?(current_user) %>
+                <% like = post.likes.find_by(user: current_user) %>
+                <%= link_to "Unlike (#{post.likes_count})", post_like_path(post, like), data: { turbo_method: :delete }, class: "btn btn-sm btn-outline-secondary" %>
+              <% else %>
+                <%= link_to "Like (#{post.likes_count})", post_likes_path(post), data: { turbo_method: :post }, class: "btn btn-sm btn-outline-primary" %>
+              <% end %>
+            </div>
+            
+            <!-- Comments -->
+            <div class="comments-section">
+              <h6>Comments (<%= post.comments_count %>)</h6>
+              
+              <!-- New Comment Form -->
+              <div class="comment-form mb-3">
+                <%= form_with(model: [post, post.comments.build]) do |form| %>
+                  <div class="input-group">
+                    <%= form.text_field :content, class: "form-control", placeholder: "Add a comment..." %>
+                    <%= form.submit "Comment", class: "btn btn-outline-primary" %>
+                  </div>
+                <% end %>
+              </div>
+              
+              <!-- Comments List -->
+              <% post.comments.includes(:user).each do |comment| %>
+                <div class="comment mb-2">
+                  <div class="d-flex justify-content-between">
+                    <strong><%= comment.user.username %></strong>
+                    <small><%= time_ago_in_words(comment.created_at) %> ago</small>
+                  </div>
+                  <p class="mb-1"><%= comment.content %></p>
+                  <% if comment.user == current_user %>
+                    <%= link_to "Delete", post_comment_path(post, comment), data: { turbo_method: :delete, turbo_confirm: "Are you sure?" }, class: "btn btn-sm btn-link text-danger" %>
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    <% else %>
+      <div class="card">
+        <div class="card-body text-center">
+          <p class="text-muted">No posts yet</p>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
